@@ -13,9 +13,30 @@ datasource db {
 }
 
 model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  password      String
+  role          String         @default("investor")
+  createdAt     DateTime       @default(now())
+  interests     Interest[]     @relation("InvestorInterests")
+  notifications Notification[]
+}
+
+model Interest {
   id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  role      String   @default("investor") // "investor" | "founder"
+  investorId String
+  startupId  String
+  createdAt  DateTime @default(now())
+  investor   User     @relation("InvestorInterests", fields: [investorId], references: [id])
+
+  @@unique([investorId, startupId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  message   String
+  read      Boolean  @default(false)
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
 }
